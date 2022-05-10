@@ -1,1 +1,1 @@
-# Blockchain Proyecto de Notas Escolares
+# Blockchain Proyecto de Calificaciones Escolares

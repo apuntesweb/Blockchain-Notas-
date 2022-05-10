@@ -16,15 +16,15 @@ contract notas {
     address public profesor;
 
     // Constructor
-    constructor() public {
+    constructor () public {
         profesor = msg.sender;
     }
 
     // Mapping para relacionar el hash de la identidad del alumno con su nota del examen
     mapping(bytes32 => uint256) Notas;
 
-    // Array de los alumnos que pidan revisiones de examen
-    string[] revisiones;
+    // Mapping de los alumnos que pidan revisiones de examen para una asignatura
+    mapping (string => string []) revisiones;
 
     // Eventos
     event alumno_evaluado(bytes32);
@@ -32,12 +32,9 @@ contract notas {
     event evento_revision(string);
 
     // funcion para evaluar a alimnos
-    function Evaluar(string memory _idAlumno, uint256 _nota)
-        public
-        UnicamenteProfesor(msg.sender)
-    {
+    function Evaluar(string memory _asignatura, string memory _idAlumno, uint256 _nota) public UnicamenteProfesor(msg.sender) {
         // Hash de la identificacion del alumno
-        bytes32 hash_idAlumno = keccak256(abi.encodePacked(_idAlumno));
+        bytes32 hash_idAlumno = keccak256(abi.encodePacked(_asignatura, _idAlumno));
         // Relacion entre el hash de la identificacion del alumno y su nota
         Notas[hash_idAlumno] = _nota;
         // Emision del evento
@@ -55,9 +52,9 @@ contract notas {
     }
 
     // Funcion para ver las notas de un alumno
-    function VerNotas(string memory _idAlumno) public view returns (uint256) {
+    function VerNotas(string memory _asignatura, string memory _idAlumno) public view returns (uint256) {
         // Hash de la identificacion del alumno
-        bytes32 hash_idAlumno = keccak256(abi.encodePacked(_idAlumno));
+        bytes32 hash_idAlumno = keccak256(abi.encodePacked(_asignatura, _idAlumno));
         // Nota asociada al hash del alumno
         uint256 nota_alumno = Notas[hash_idAlumno];
         // Visualizar la nota
@@ -65,21 +62,16 @@ contract notas {
     }
 
     // Funcion para pedir revision del examen
-    function Revision(string memory _idAlumno) public {
+    function Revision(string memory _asignatura, string memory _idAlumno) public {
         // Almacenamiento de la identidad del alumno en un array
-        revisiones.push(_idAlumno);
+        revisiones[_asignatura].push(_idAlumno);
         // Emision del evento
         emit evento_revision(_idAlumno);
     }
 
     // Funcion para ver quien ha pedido revision del examen
-    function VerRevisiones()
-        public
-        view
-        UnicamenteProfesor(msg.sender)
-        returns (string[] memory)
-    {
+    function VerRevisiones(string memory _asignatura) public view UnicamenteProfesor(msg.sender) returns (string[] memory) {
         // Devolver las identidades de los alumnos que han solicitado revision
-        return revisiones;
+        return revisiones[_asignatura];
     }
 }
